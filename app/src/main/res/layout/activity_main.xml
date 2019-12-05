@@ -26,15 +26,36 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="OK"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/logout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LOGOUT"
+            android:layout_marginTop="10dp"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="REF"
+            android:layout_marginStart="50dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginTop="10dp"
+            android:id="@+id/refresh"/>
+    </LinearLayout>
     <Button
-        android:id="@+id/logout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="LOGOUT"
-        android:layout_marginTop="10dp"/>
+        android:layout_gravity="center_horizontal"
+        android:paddingTop="10dp"
+        android:text="Add Data"
+        android:id="@+id/add_data_button"/>
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/recycler_view" />
+        android:id="@+id/recycler_view"
+        android:paddingTop="10dp"/>
 
 </LinearLayout>

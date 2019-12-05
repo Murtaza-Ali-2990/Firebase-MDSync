@@ -105,6 +105,7 @@ public class LoginActivity extends AppCompatActivity {
                                 Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
                                 mainIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 startActivity(mainIntent);
+                                finish();
                             } else {
 
                                 mAuth.createUserWithEmailAndPassword(uname, pass)
@@ -120,6 +121,7 @@ public class LoginActivity extends AppCompatActivity {
                                                     Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
                                                     mainIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                                     startActivity(mainIntent);
+                                                    finish();
                                                     //updateUI(user);
                                                 } else {
 
@@ -200,5 +202,7 @@ public class LoginActivity extends AppCompatActivity {
                 Log.i(TAG, "onFailure: Failed Token", e);
             }
         });
+
+        getSharedPreferences("token", MODE_PRIVATE).edit().putString("token", token_id).apply();
     }
 }

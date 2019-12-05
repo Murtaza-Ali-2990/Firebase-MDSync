@@ -1,6 +1,7 @@
 package com.example.fbtestapp;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,17 +24,24 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.auth.User;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.FirebaseFunctionsException;
-import com.google.firebase.functions.HttpsCallableResult;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -45,11 +53,13 @@ import javax.security.auth.login.LoginException;
 public class MainActivity extends AppCompatActivity {
 
     private String TAG = "FB";
-    private ArrayList<String> nameList = null;
     private RecyclerView recyclerView;
-    private FirebaseFunctions firebaseFunctions;
+    private RecyclerAdapter adapter;
     private FirebaseAuth firebaseAuth;
     private FirebaseAuth.AuthStateListener mAL;
+    private ListenerRegistration registration;
+    private FirebaseFirestore db;
+    private DatabaseHandler databaseHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,30 +67,47 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         FirebaseMessaging.getInstance().setAutoInitEnabled(true);
-
-
-
         firebaseAuth = FirebaseAuth.getInstance();
-        mAL = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                if(firebaseAuth.getCurrentUser() == null) {
-                    Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
-                    loginIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(loginIntent);
-                }
-            }
-        };
-        firebaseAuth.addAuthStateListener(mAL);
+        if(firebaseAuth.getCurrentUser() == null) {
+            Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
+            loginIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(loginIntent);
+            return;
+        }
 
-        firebaseFunctions = FirebaseFunctions.getInstance();
-
-        final FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db = FirebaseFirestore.getInstance();
+        databaseHandler = new DatabaseHandler(this);
 
         final EditText editText = findViewById(R.id.etext);
         final TextView t = findViewById(R.id.textview);
         Button button = findViewById(R.id.button);
         Button logout = findViewById(R.id.logout);
+        Button addData = findViewById(R.id.add_data_button);
+        Button refresh = findViewById(R.id.refresh);
+
+        adapter = new RecyclerAdapter(new DatabaseHandler(this).getListData(0));
+        recyclerView = findViewById(R.id.recycler_view);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
+
+  /*      db.collection("user").document(firebaseAuth.getCurrentUser().getUid()).collection("names").addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                if(e != null) {
+                    Log.i(TAG, "onEvent: FAILED");
+                    return;
+                }
+                Log.i(TAG, "onEvent: "+ queryDocumentSnapshots);
+
+                for(QueryDocumentSnapshot doc : queryDocumentSnapshots){
+                    Log.i(TAG, "onEvent: " + doc);
+                }
+            }
+        });
+*/
+
+        Log.i(TAG, "onCreate: " + new Timestamp(new Date()));
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,8 +117,8 @@ public class MainActivity extends AppCompatActivity {
                 name.put("contact", 90999990);
 
                 final Map<String, Object> k = new HashMap<>();
-                k.put("Gender", "Male");
-                k.put("Name", editText.getText().toString());
+                k.put("gender", "Male");
+                k.put("name", editText.getText().toString());
 
                 FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
                     @Override
@@ -102,8 +129,8 @@ public class MainActivity extends AppCompatActivity {
 
                         String token = task.getResult().getToken();
                         Log.i(TAG, "onComplete: Token : "+ token);
-                        k.put("Token", token);
-                        k.put("Timestamp", new Timestamp(new Date()));
+                        k.put("token", token);
+                        k.put("timestamp", new Timestamp(new Date()));
                     }
                 });
 
@@ -165,7 +192,6 @@ public class MainActivity extends AppCompatActivity {
                                         t.setText(doc.get("name").toString());
                                         break;
                                     }
-                                    nameList = nList;
                                 }
                                 else
                                     Log.i(TAG, "onComplete: TASK FAILED SUCCESSFULLY");
@@ -177,18 +203,76 @@ public class MainActivity extends AppCompatActivity {
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                getSharedPreferences("token", MODE_PRIVATE).edit().putString("token", "").apply();
                 firebaseAuth.signOut();
             }
         });
+
+        addData.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, AddUserData.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        refresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                finish();
+            }
+        });
+
     }
 
-    private Task<String> addMessage(Map<String, Object> obj) {
-        return firebaseFunctions.getHttpsCallable("addMessage").call(obj)
-                .continueWith(new Continuation<HttpsCallableResult, String>() {
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        registration = db.collection("user").document(firebaseAuth.getCurrentUser().getUid()).collection("names")
+                .whereGreaterThan("tstamp", getSharedPreferences("timestamp", MODE_PRIVATE).getLong("tstamp", 0))
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
-                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
-                        return (String) task.getResult().getData();
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                        if(e != null){
+                            Log.i(TAG, "onEvent: FAILED");
+                            return;
+                        }
+                        Log.i(TAG, "onEvent: ME?" + queryDocumentSnapshots);
+                        Log.i(TAG, "onEvent: previous" + getSharedPreferences("timestamp", MODE_PRIVATE).getLong("tstamp", 0));
+
+                        for(DocumentSnapshot doc: queryDocumentSnapshots){
+                            if(doc.getLong("tstamp") > getSharedPreferences("timestamp", MODE_PRIVATE).getLong("tstamp", 0)){
+                                Log.i(TAG, "onEvent: YES EM " + doc);
+                                databaseHandler.addDataUpdate(UserData.makeUserData(doc));
+                                adapter.updateData(databaseHandler.getListData(0));
+                            }
+                        }
+                        getSharedPreferences("timestamp", MODE_PRIVATE).edit().putLong("tstamp", new Timestamp(new Date())
+                                .getSeconds()).apply();
+                        Log.i(TAG, "onEvent: " + getSharedPreferences("timestamp", MODE_PRIVATE).getLong("tstamp", 0));
+
                     }
                 });
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.i(TAG, "onStop: CALLED");
+        if(registration != null)
+            registration.remove();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i(TAG, "onDestroy: called");
     }
 }
