@@ -7,6 +7,8 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.util.Map;
+
 public class UserData {
     private long id;
     private String name;
@@ -99,6 +101,16 @@ public class UserData {
         userData.setToken(doc.getString("token"));
         userData.setTimestamp(doc.getTimestamp("timestamp"));
         userData.setTstamp(doc.getLong("tstamp"));
+
+        return userData;
+    }
+    public static UserData makeUserData(Map<String, String> data){
+        UserData userData = new UserData();
+        userData.setId(Long.valueOf(data.get("id")));
+        userData.setName(data.get("name"));
+        userData.setSurname(data.get("surname"));
+        userData.setSex(data.get("sex"));
+        userData.setAge(Long.valueOf(data.get("age")));
 
         return userData;
     }

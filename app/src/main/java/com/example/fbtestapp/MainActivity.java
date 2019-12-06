@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
         Button logout = findViewById(R.id.logout);
         Button addData = findViewById(R.id.add_data_button);
         Button refresh = findViewById(R.id.refresh);
+        Button notif = findViewById(R.id.notif_table);
 
         adapter = new RecyclerAdapter(new DatabaseHandler(this).getListData(0));
         recyclerView = findViewById(R.id.recycler_view);
@@ -227,6 +228,14 @@ public class MainActivity extends AppCompatActivity {
                 finish();
             }
         });
+        notif.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, NotificationTableActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+        });
 
     }
 
@@ -235,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
 
         registration = db.collection("user").document(firebaseAuth.getCurrentUser().getUid()).collection("names")
-                .whereGreaterThan("tstamp", getSharedPreferences("timestamp", MODE_PRIVATE).getLong("tstamp", 0))
+                .whereGreaterThan("id", getSharedPreferences("id", MODE_PRIVATE).getLong("id", 0))
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
@@ -244,18 +253,19 @@ public class MainActivity extends AppCompatActivity {
                             return;
                         }
                         Log.i(TAG, "onEvent: ME?" + queryDocumentSnapshots);
-                        Log.i(TAG, "onEvent: previous" + getSharedPreferences("timestamp", MODE_PRIVATE).getLong("tstamp", 0));
+                        Log.i(TAG, "onEvent: previous" + getSharedPreferences("id", MODE_PRIVATE).getLong("id", 0));
 
                         for(DocumentSnapshot doc: queryDocumentSnapshots){
-                            if(doc.getLong("tstamp") > getSharedPreferences("timestamp", MODE_PRIVATE).getLong("tstamp", 0)){
-                                Log.i(TAG, "onEvent: YES EM " + doc);
+                            Log.i(TAG, "onEvent: YES EM " + doc);
+                            if(doc.getLong("id") > getSharedPreferences("id", MODE_PRIVATE).getLong("id", 0)){
                                 databaseHandler.addDataUpdate(UserData.makeUserData(doc));
+                                Log.i(TAG, "onEvent: YES EM ye hua " + doc);
                                 adapter.updateData(databaseHandler.getListData(0));
+                                getSharedPreferences("id", MODE_PRIVATE).edit().putLong("id", doc.getLong("id")).apply();
                             }
                         }
-                        getSharedPreferences("timestamp", MODE_PRIVATE).edit().putLong("tstamp", new Timestamp(new Date())
-                                .getSeconds()).apply();
-                        Log.i(TAG, "onEvent: " + getSharedPreferences("timestamp", MODE_PRIVATE).getLong("tstamp", 0));
+
+                        Log.i(TAG, "onEvent: " + getSharedPreferences("id", MODE_PRIVATE).getLong("id", 0));
 
                     }
                 });

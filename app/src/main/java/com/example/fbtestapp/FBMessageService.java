@@ -20,6 +20,7 @@ import com.google.firebase.messaging.RemoteMessage;
 public class FBMessageService extends FirebaseMessagingService {
 
     String TAG = "FBMessageService";
+    private DatabaseHandler databaseHandler;
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -29,6 +30,8 @@ public class FBMessageService extends FirebaseMessagingService {
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
+            databaseHandler = new DatabaseHandler(this);
+            databaseHandler.addDataNotif(UserData.makeUserData(remoteMessage.getData()));
         }
 
         if(remoteMessage.getNotification() != null) {

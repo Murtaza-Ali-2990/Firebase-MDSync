@@ -77,12 +77,20 @@ public class AddUserData extends AppCompatActivity {
                     }
                 });
 
+                getSharedPreferences("id", MODE_PRIVATE).edit().putLong("id", userData.getId()).apply();
                 getSharedPreferences("timestamp", MODE_PRIVATE).edit().putString("timestamp", new Timestamp(new Date()).toString()).apply();
                 getSharedPreferences("timestamp", MODE_PRIVATE).edit().putLong("tstamp", new Timestamp(new Date()).getSeconds()).apply();
-                Intent intent = new Intent(AddUserData.this, MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                finish();
+                if(getIntent().getIntExtra("activity", 0) == 1){
+                    Intent intent = new Intent(AddUserData.this, NotificationTableActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    Intent intent = new Intent(AddUserData.this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent);
+                    finish();
+                }
             }
         });
     }
@@ -90,9 +98,17 @@ public class AddUserData extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        Intent intent = new Intent(AddUserData.this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-        finish();
+
+        if(getIntent().getIntExtra("activity", 0) == 1){
+            Intent intent = new Intent(AddUserData.this, NotificationTableActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            finish();
+        } else {
+            Intent intent = new Intent(AddUserData.this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            finish();
+        }
     }
 }
