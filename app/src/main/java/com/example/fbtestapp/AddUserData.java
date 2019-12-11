@@ -55,13 +55,12 @@ public class AddUserData extends AppCompatActivity {
                 userData.setSurname(surnameText.getText().toString().trim());
                 userData.setSex(genderText.getText().toString().trim());
                 userData.setAge(Integer.parseInt(ageText.getText().toString().trim()));
-                userData.setTimestamp(new Timestamp(new Date()));
-                userData.setTstamp(new Timestamp(new Date()).getSeconds());
                 userData.setToken(getSharedPreferences("token", MODE_PRIVATE).getString("token", ""));
+                userData.setUpdates(0);
 
                 DatabaseHandler db = new DatabaseHandler(AddUserData.this);
-                db.addDataNotif(userData);
-                long rowId = db.addDataUpdate(userData);
+                long rowId = db.addDataNotif(userData);
+                long k = db.addDataUpdate(userData);
                 userData.setId(rowId);
 
                 DocumentReference ref = firestore.collection("user").document(FirebaseAuth.getInstance().getCurrentUser().getUid());
@@ -77,9 +76,7 @@ public class AddUserData extends AppCompatActivity {
                     }
                 });
 
-                getSharedPreferences("id", MODE_PRIVATE).edit().putLong("id", userData.getId()).apply();
-                getSharedPreferences("timestamp", MODE_PRIVATE).edit().putString("timestamp", new Timestamp(new Date()).toString()).apply();
-                getSharedPreferences("timestamp", MODE_PRIVATE).edit().putLong("tstamp", new Timestamp(new Date()).getSeconds()).apply();
+                getSharedPreferences("id", MODE_PRIVATE).edit().putLong("id", k).apply();
                 if(getIntent().getIntExtra("activity", 0) == 1){
                     Intent intent = new Intent(AddUserData.this, NotificationTableActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);

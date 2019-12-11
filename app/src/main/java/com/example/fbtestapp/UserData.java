@@ -15,9 +15,8 @@ public class UserData {
     private String surname;
     private String sex;
     private long age;
-    private Timestamp timestamp;
     private String token;
-    private long tstamp;
+    private long updates;
 
     UserData(){}
     UserData(String name, String surname, String sex, long age){
@@ -43,16 +42,12 @@ public class UserData {
         return surname;
     }
 
-    public Timestamp getTimestamp() {
-        return timestamp;
-    }
-
     public String getToken() {
         return token;
     }
 
-    public long getTstamp() {
-        return tstamp;
+    public long getUpdates() {
+        return updates;
     }
 
     public long getId() {
@@ -75,16 +70,12 @@ public class UserData {
         this.surname = surname;
     }
 
-    public void setTimestamp(Timestamp timestamp) {
-        this.timestamp = timestamp;
-    }
-
     public void setToken(String token) {
         this.token = token;
     }
 
-    public void setTstamp(long tstamp) {
-        this.tstamp = tstamp;
+    public void setUpdates(long updates) {
+        this.updates = updates;
     }
 
     public void setId(long id) {
@@ -99,8 +90,7 @@ public class UserData {
         userData.setSex(doc.getString("sex"));
         userData.setAge(doc.getLong("age"));
         userData.setToken(doc.getString("token"));
-        userData.setTimestamp(doc.getTimestamp("timestamp"));
-        userData.setTstamp(doc.getLong("tstamp"));
+        userData.setUpdates(doc.getLong("updates"));
 
         return userData;
     }
@@ -111,6 +101,8 @@ public class UserData {
         userData.setSurname(data.get("surname"));
         userData.setSex(data.get("sex"));
         userData.setAge(Long.valueOf(data.get("age")));
+        userData.setToken(data.get("token"));
+        userData.setUpdates(Long.valueOf(data.get("updates")));
 
         return userData;
     }

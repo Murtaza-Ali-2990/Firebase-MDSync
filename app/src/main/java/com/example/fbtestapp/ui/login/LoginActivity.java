@@ -204,5 +204,6 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         getSharedPreferences("token", MODE_PRIVATE).edit().putString("token", token_id).apply();
+        getSharedPreferences("id", MODE_PRIVATE).edit().putLong("id", 0).apply();
     }
 }

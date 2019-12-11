@@ -48,7 +48,7 @@ public class NotificationTableActivity extends AppCompatActivity {
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                adapter.updateData(databaseHandler.getListData(0));
+                adapter.updateData(databaseHandler.getListData(1));
             }
         });
     }

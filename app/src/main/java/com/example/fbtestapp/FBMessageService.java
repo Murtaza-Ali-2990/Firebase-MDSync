@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -23,7 +24,8 @@ public class FBMessageService extends FirebaseMessagingService {
     private DatabaseHandler databaseHandler;
 
     @Override
-    public void onMessageReceived(RemoteMessage remoteMessage) {
+    public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
+        super.onMessageReceived(remoteMessage);
 
         Log.d(TAG, "From: " + remoteMessage.getFrom());
 
@@ -31,12 +33,23 @@ public class FBMessageService extends FirebaseMessagingService {
         if (remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
             databaseHandler = new DatabaseHandler(this);
-            databaseHandler.addDataNotif(UserData.makeUserData(remoteMessage.getData()));
-        }
-
-        if(remoteMessage.getNotification() != null) {
-            Log.i(TAG, "onMessageReceived: "+ remoteMessage.getNotification().getBody() + " and Title " + remoteMessage.getNotification().getTitle());
-            sendNotification(remoteMessage.getNotification().getBody(), remoteMessage.getNotification().getTitle());
+            UserData userData = UserData.makeUserData(remoteMessage.getData());
+            if(databaseHandler.doesIdExists(userData.getId())){
+                Log.i(TAG, "onMessageReceived: UPDATES " + userData.getUpdates());
+                if(userData.getUpdates() == 1) {
+                    databaseHandler.updateDataNotif(userData);
+                    if(remoteMessage.getNotification() != null) {
+                        Log.i(TAG, "onMessageReceived: "+ remoteMessage.getNotification().getBody() + " and Title " + remoteMessage.getNotification().getTitle());
+                        sendNotification(remoteMessage.getNotification().getBody(), remoteMessage.getNotification().getTitle());
+                    }
+                }
+            } else {
+                databaseHandler.addDataNotif(userData);
+                if(remoteMessage.getNotification() != null) {
+                    Log.i(TAG, "onMessageReceived: "+ remoteMessage.getNotification().getBody() + " and Title " + remoteMessage.getNotification().getTitle());
+                    sendNotification(remoteMessage.getNotification().getBody(), remoteMessage.getNotification().getTitle());
+                }
+            }
         }
     }
 
