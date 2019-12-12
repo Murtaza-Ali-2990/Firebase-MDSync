@@ -101,6 +101,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close();
     }
 
+    public void deleteDataNotif(long id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.delete(TABLE_NAME_NOTIF, KEY_ID + " = " + id, null);
+        db.close();
+    }
+
     public List<UserData> getListData (int k){
         List<UserData> userDataList = new ArrayList<>();
 

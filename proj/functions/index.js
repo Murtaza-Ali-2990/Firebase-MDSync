@@ -116,3 +116,36 @@ exports.UpdateDoc = functions.firestore.document('user/{userId}/names/{docId}').
 		console.log('Error fetching tokens', error);
 	});
 });
+
+exports.DeleteDoc = functions.firestore.document('user/{userId}/names/{docId}').onDelete((snap, context) => {
+	const userId = context.params.userId;
+	const docId = context.params.docId;
+
+	const ref = snap.data();
+	const tokenRef = admin.firestore().collection('user').doc(userId).collection('Token').doc('token');
+
+	return tokenRef.get().then(snap => {
+		var tokens = snap.data().Token;
+
+		var message = {
+			data: {
+				id: ref.id.toString(),
+				name: ref.name,
+				delete: 'true'
+			},
+			android: {
+				priority: 'high'
+			},
+			tokens: tokens
+		};
+
+		return admin.messaging().sendMulticast(message).then(response => {
+			console.log('Delete update sent successfully to ' + response.successCount + ' devices', response);
+			return null;
+		}).catch(error => {
+			console.log('Error sending message', error);
+		});
+	}).catch(error => {
+		console.log('Error fetching tokens', error);
+	});
+});

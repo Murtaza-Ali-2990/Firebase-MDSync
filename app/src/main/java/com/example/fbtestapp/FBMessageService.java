@@ -29,6 +29,11 @@ public class FBMessageService extends FirebaseMessagingService {
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             Log.i(TAG, "Message data payload: " + remoteMessage.getData());
+            if(remoteMessage.getData().containsKey("delete")){
+                databaseHandler.deleteDataNotif(Long.valueOf(remoteMessage.getData().get("id")));
+                sendNotification("Data deleted", remoteMessage.getData().get("name"), Long.valueOf(remoteMessage.getData().get("id")));
+                return;
+            }
             UserData userData = UserData.makeUserData(remoteMessage.getData());
             if(databaseHandler.doesIdExists(userData.getId())){
                 Log.i(TAG, "onMessageReceived: UPDATES " + userData.getUpdates());
