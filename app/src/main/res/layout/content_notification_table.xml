@@ -9,25 +9,43 @@
     tools:context=".NotificationTableActivity"
     tools:showIn="@layout/activity_notification_table">
 
-    <Button
-        android:layout_width="wrap_content"
+    <TextView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="ADD"
-        android:id="@+id/add_notif_data_button"/>
+        android:text="Notification Table"
+        android:textSize="20dp"
+        android:gravity="center_horizontal"
+        android:padding="10dp"
+        android:layout_margin="10dp"/>
 
-    <Button
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="10dp"
-        android:text="REFRESH"
-        android:id="@+id/refresh"/>
+        android:orientation="horizontal"
+        android:layout_margin="5dp"
+        android:padding="5dp"
+        android:weightSum="2">
+        <Button
+            android:id="@+id/add_notif_data_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ADD"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="REFRESH"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            android:id="@+id/refresh"/>
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/recycler_view_notif"
-        android:paddingTop="10dp"/>
+        android:padding="5dp"
+        android:layout_margin="10dp"/>
 
 </LinearLayout>

@@ -1,11 +1,6 @@
 package com.example.fbtestapp;
 
-
-import android.content.Intent;
-
-import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.Map;
 

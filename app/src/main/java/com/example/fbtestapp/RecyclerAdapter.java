@@ -15,7 +15,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyHold
 
     RecyclerAdapter(List<UserData> userDataList){this.userDataList = userDataList;}
 
-    public void updateData(List<UserData> list){
+    void updateData(List<UserData> list){
         userDataList.clear();
         userDataList.addAll(list);
         notifyDataSetChanged();
