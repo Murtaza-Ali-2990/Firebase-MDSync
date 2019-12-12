@@ -49,7 +49,7 @@ public class AddUserData extends AppCompatActivity {
 
                 DatabaseHandler db = new DatabaseHandler(AddUserData.this);
                 long rowId = db.addDataNotif(userData);
-                long k = db.addDataUpdate(userData);
+                long rowIdUpdate = db.addDataUpdate(userData);
                 userData.setId(rowId);
 
                 DocumentReference ref = firestore.collection("user").document(FirebaseAuth.getInstance().getCurrentUser().getUid());
@@ -65,7 +65,7 @@ public class AddUserData extends AppCompatActivity {
                     }
                 });
 
-                getSharedPreferences("id", MODE_PRIVATE).edit().putLong("id", k).apply();
+                getSharedPreferences("id", MODE_PRIVATE).edit().putLong("id", rowIdUpdate).apply();
 
                 if(getIntent().getIntExtra("activity", 0) == 1){
                     Intent intent = new Intent(AddUserData.this, NotificationTableActivity.class);
